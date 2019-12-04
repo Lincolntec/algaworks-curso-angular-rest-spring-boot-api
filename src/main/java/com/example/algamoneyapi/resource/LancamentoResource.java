@@ -18,40 +18,46 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.algamoneyapi.event.RecursoCriadoEvent;
-import com.example.algamoneyapi.model.Categoria;
-import com.example.algamoneyapi.repository.CategoriaRepository;
+import com.example.algamoneyapi.model.Lancamento;
+import com.example.algamoneyapi.repository.LancamentoRepository;
 
 @RestController
-@RequestMapping("/categorias")
-public class CategoriaResource {
+@RequestMapping("/lancamentos")
+public class LancamentoResource {
 	
 	@Autowired
-	private CategoriaRepository categoriaRepository;
+	private LancamentoRepository lancamentoRepository;
 	
 	@Autowired
 	private ApplicationEventPublisher publisher;
 	
 	@GetMapping
-	public List<Categoria> listar(){
+	public List<Lancamento> lista(){
 		
-		return categoriaRepository.findAll();
-		
+		return lancamentoRepository.findAll();
 	}
 	
 	@PostMapping
-	public ResponseEntity<Categoria> criar(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
-		 Categoria categoriaSalva = categoriaRepository.save(categoria);
-		 
-		 publisher.publishEvent(new RecursoCriadoEvent(this, response, categoriaSalva.getCodigo()));
-		 return ResponseEntity.status(HttpStatus.CREATED).body(categoriaSalva);
+	public ResponseEntity<Lancamento> criar(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
+		
+		Lancamento lancamentoSalvo = lancamentoRepository.save(lancamento);
+		
+		publisher.publishEvent( new RecursoCriadoEvent(this, response, lancamento.getCodigo()));
+		
+		return ResponseEntity.status(HttpStatus.CREATED).body(lancamentoSalvo);
+		
 	}
 	
 	@GetMapping("/{codigo}")
-	public ResponseEntity<Categoria> buscarPeloCodigo(@PathVariable Long codigo) {
+	public ResponseEntity<Lancamento> buscaLancamentoPorCodigo(@PathVariable Long codigo) {
 		
-		Optional<Categoria> categoria = this.categoriaRepository.findById(codigo);
-		return categoria.isPresent() ? ResponseEntity.ok(categoria.get()) 
+		Optional<Lancamento> lancamentoSalvo =  lancamentoRepository.findById(codigo);
+		
+		return lancamentoSalvo.isPresent() ? ResponseEntity.ok(lancamentoSalvo.get())
 				: ResponseEntity.notFound().build();
+			
+		
+		
 	}
 
 }
